@@ -230,7 +230,7 @@ EOT
   fi
 
   # Check if the configuration file is already symlinked.
-  if test -L "${GOBACKUP_CONFIG_PATH}/${config_file}"; then
+  if test -L "${GOBACKUP_CONFIG_PATH}/${config_file_name}.yml"; then
     echo "GoBackup configuration file is already symlinked, skipping ..."
   else
     # Symlink the configuration file.
