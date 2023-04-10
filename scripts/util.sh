@@ -57,16 +57,21 @@ function install_go() {
         sudo apt-get remove --quiet -y golang
       fi
     fi
+  else
+    echo "Go is not installed, installing ..."
   fi
 
   ## FIXME: Configure the version, platform and architecture with env vars
   ## FIXME: Configure the architecture so that eg. armv7l uses armv6l instead
   echo "Installing Go version ${GO_VERSION} ..."
+  local current_dir="$(pwd)"
+  cd /usr/local
   if test $(id -u) -eq 0; then
-    bash -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
+    curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -
   else
-    sudo bash -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
+    sudo curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -
   fi
+  cd "${current_dir}"
   # curl -sSL https://go.dev/dl/go1.20.3.linux-armv6l.tar.gz | tar xzf -
 
   # Add Go to PATH for the current user's profile,
@@ -82,9 +87,9 @@ function install_go() {
   # # Install Go using apt-get.
   # echo "Installing Go (this requires root privileges) ..."
   # if test $(id -u) -eq 0; then
-  #   apt-get install --quiet -y golang
+  #   apt-get install --quiet --no-install-recommends -y golang
   # else
-  #   sudo apt-get install --quiet -y golang
+  #   sudo apt-get install --quiet --no-install-recommends -y golang
   # fi
 
   # Ensure that the correct versino of Go is installed.
@@ -95,7 +100,7 @@ function install_go() {
     exit 1
   fi
 
-  echo "Successfully installed Go"
+  echo "Successfully installed Go version ${go_version}"
   return
 }
 
