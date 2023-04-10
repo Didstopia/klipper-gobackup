@@ -39,6 +39,7 @@ function check_go_version() {
   # Check that Go version is at least 1.13.
   local min_go_version="${GO_VERSION_MIN}"
   local go_version="$(go version | awk '{print $3}')"
+  go_version="${go_version:2}"
   if [ $(version ${go_version}) -ge $(version ${min_go_version}) ]; then
     # echo "Go version ${go_version} is newer than or equal to ${min_go_version}"
     return 0
@@ -73,6 +74,7 @@ function install_go() {
     # Check that Go version is at least 1.13.
     local min_go_version="${GO_VERSION_MIN}"
     local go_version="$(go version | awk '{print $3}')"
+    go_version="${go_version:2}"
     local go_needs_update="$(check_go_version; echo $?)"
     if [ $go_needs_update = 1 ]; then
       echo "Go version ${go_version} is not new enough (needs to be ${min_go_version} or newer), removing old version ..."
