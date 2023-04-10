@@ -87,7 +87,7 @@ function install_gobackup() {
 
     # Download the GoBackup source code.
     echo "Downloading GoBackup source code ..."
-    git clone --depth 1 --branch "v${GOBACKUP_VERSION}" "${GOBACKUP_REPOSITORY}" "${GOBACKUP_TEMP_PATH}"
+    git clone --depth 1 --branch "v${GOBACKUP_VERSION}" "https://github.com/${GOBACKUP_REPOSITORY}.git" "${GOBACKUP_TEMP_PATH}"
     ## TODO: Do we need to clear the temp dir first, before cloning?
 
     # Install Go dependencies.
