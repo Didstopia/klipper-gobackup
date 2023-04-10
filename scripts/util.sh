@@ -31,6 +31,9 @@ function install_go() {
   # Check if Go is already installed.
   echo "Checking if Go is installed ..."
   local go="$(which go)"
+  if test -z "${go}"; then
+    go="/usr/local/go/bin/go"
+  fi
   if test -e "${go}"; then
     # echo "Go already installed, checking for updates ..."
 

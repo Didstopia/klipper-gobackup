@@ -98,10 +98,13 @@ function install_gobackup() {
 
     # Install Yarn
     echo "Ensuring yarn is installed ..."
-    if test $(id -u) -eq 0; then
-      apt-get install -y --no-install-recommends yarnpkg
-    else
-      sudo apt-get install -y --no-install-recommends yarnpkg
+    if ! command -v yarn &> /dev/null; then
+      echo "yarn not found, installing ..."
+      if test $(id -u) -eq 0; then
+        npm install --global yarn
+      else
+        sudo npm install --global yarn
+      fi
     fi
 
     # Build web assets
