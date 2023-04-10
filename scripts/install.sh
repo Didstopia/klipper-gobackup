@@ -85,17 +85,21 @@ function install_gobackup() {
     # Ensure that Go is installed and up-to-date.
     install_go
 
-    ## TODO: Shouldn't we instead clone the repository to the user's home, so we can update + reset + reuse it later?
-
     # Download the GoBackup source code.
     echo "Downloading GoBackup source code ..."
-    git clone --depth 1 --branch "v${GOBACKUP_VERSION}" "https://github.com/${GOBACKUP_REPOSITORY}.git" "${GOBACKUP_TEMP_PATH}"
-    ## TODO: Do we need to clear the temp dir first, before cloning?
+    local gobackup_source_path="${HOME}/gobackup"
+    if test ! -d "${gobackup_source_path}"; then
+      git clone --depth 1 --branch "v${GOBACKUP_VERSION}" "https://github.com/${GOBACKUP_REPOSITORY}.git" "${gobackup_source_path}"
+    else
+      cd "${gobackup_source_path}"
+      git fetch --all --tags --prune
+      git reset --hard "v${GOBACKUP_VERSION}"
+    fi
 
     # Install Go dependencies.
     echo "Installing GoBackup build dependencies ..."
-    go get -v -d ./...
-    # go mod download
+    # go get -v -d ./...
+    go mod download
 
     # Build the GoBackup binary for the current platform and architecture.
     echo "Building GoBackup binary for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE} ..."
