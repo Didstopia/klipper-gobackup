@@ -144,8 +144,10 @@ function install_gobackup() {
   echo "Installing GoBackup binary (this requires root privileges) ..."
   if test $(id -u) -eq 0; then
     cp -f "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}" "${GOBACKUP_BINARY_PATH}"
+    chmod +x "${GOBACKUP_BINARY_PATH}"
   else
     sudo cp -f "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}" "${GOBACKUP_BINARY_PATH}"
+    sudo chmod +x "${GOBACKUP_BINARY_PATH}"
   fi
 
   # Ensure that the user specific GoBackup configuration directory exists.
@@ -241,16 +243,16 @@ EOT
 
 # Function for installing or updating the custom systemd service for GoBackup.
 function install_gobackup_service() {
-  local source_path = "${GOBACKUP_TEMP_PATH}/${GOBACKUP_SERVICE_NAME}"
-  local target_path = "/etc/systemd/system/${GOBACKUP_SERVICE_NAME}.service"
+  local source_path="${GOBACKUP_TEMP_PATH}/${GOBACKUP_SERVICE_NAME}"
+  local target_path="/etc/systemd/system/${GOBACKUP_SERVICE_NAME}.service"
 
-  local user = "$(id -un)"
+  local user="$(id -un)"
   if test -z "${user}"; then
     echo "ERROR: Could not determine current user name" >&2
     exit 1
   fi
 
-  local group = "$(id -gn)"
+  local group="$(id -gn)"
   if test -z "${group}"; then
     echo "ERROR: Could not determine current group name" >&2
     exit 1
@@ -281,7 +283,7 @@ EOT
     echo "GoBackup systemd service already installed, checking for updates ..."
 
     # Check the GOBACKUP_VERSION of the service file to determine if we need to update it
-    local service_version = "$(grep "^# GOBACKUP_VERSION=" "${target_path}" | awk -F= '{print $NF}')"
+    local service_version="$(grep "^# GOBACKUP_VERSION=" "${target_path}" | awk -F= '{print $NF}')"
     if test "${service_version}" = "${GOBACKUP_VERSION}"; then
       echo "GoBackup systemd service already up-to-date"
       return
