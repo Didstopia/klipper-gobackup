@@ -259,6 +259,7 @@ function install_gobackup_service() {
   fi
 
   # Echo a systemd service file to the temporary directory.
+  rm -f "${source_path}" || true
   cat <<EOT >> "${source_path}"
 # GOBACKUP_VERSION=${GOBACKUP_VERSION}
 [Unit]
