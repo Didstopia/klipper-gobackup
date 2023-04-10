@@ -37,7 +37,7 @@ trap "cleanup" EXIT
 # Function for cleaning up when terminating the script.
 function cleanup() {
   # Remove the temporary directory.
-  rm -r ${GOBACKUP_TEMP_PATH}
+  rm -fr ${GOBACKUP_TEMP_PATH}
 }
 
 # Load the utility functions.
@@ -85,6 +85,8 @@ function install_gobackup() {
     # Ensure that Go is installed and up-to-date.
     install_go
 
+    ## TODO: Shouldn't we instead clone the repository to the user's home, so we can update + reset + reuse it later?
+
     # Download the GoBackup source code.
     echo "Downloading GoBackup source code ..."
     git clone --depth 1 --branch "v${GOBACKUP_VERSION}" "https://github.com/${GOBACKUP_REPOSITORY}.git" "${GOBACKUP_TEMP_PATH}"
@@ -92,8 +94,8 @@ function install_gobackup() {
 
     # Install Go dependencies.
     echo "Installing GoBackup build dependencies ..."
-    # go get -v -d ./...
-    go mod download
+    go get -v -d ./...
+    # go mod download
 
     # Build the GoBackup binary for the current platform and architecture.
     echo "Building GoBackup binary for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE} ..."
