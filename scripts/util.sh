@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+GO_VERSION="1.20.3"
+
 ## TODO: Since we want to create user specific configuration files and folders, we would never want to run this as root, right?
 # Ensure that this script is never ran as root.
 if test $(id -u) -eq 0; then
@@ -27,30 +29,63 @@ function install_go() {
   ## TODO: Use PackageKit instead of apt-get directly!?
 
   # Check if Go is already installed.
+  echo "Checking if Go is installed ..."
   local go="$(which go)"
   if test -e "${go}"; then
-    echo "Go already installed, checking for updates ..."
+    # echo "Go already installed, checking for updates ..."
 
-    # Check if Go can be updated using apt-get.
-    if test $(id -u) -eq 0; then
-      apt-get update --quiet
-      apt-get upgrade --quiet -y golang
+    # # Check if Go can be updated using apt-get.
+    # if test $(id -u) -eq 0; then
+    #   apt-get update --quiet
+    #   apt-get upgrade --quiet -y golang
+    # else
+    #   sudo apt-get update --quiet
+    #   sudo apt-get upgrade --quiet -y golang
+    # fi
+
+    # Check that Go version is at least 1.13.
+    echo "Checking Go version ..."
+    local go_version="$(go version | awk '{print $3}')"
+    if test "$(printf '%s %s' "${go_version}" "1.13" | sort -V | head -n1)" = "1.13"; then
+      echo "Go version ${go_version} is new enough, skipping installation ..."
+      return
     else
-      sudo apt-get update --quiet
-      sudo apt-get upgrade --quiet -y golang
-    fi    
-  else
-    # Install Go using apt-get.
-    echo "Installing Go (this requires root privileges) ..."
-    if test $(id -u) -eq 0; then
-      apt-get install --quiet -y golang
-    else
-      sudo apt-get install --quiet -y golang
+      echo "Go version ${go_version} is not new enough, removing old version ..."
+      if test $(id -u) -eq 0; then
+        apt-get remove --quiet -y golang
+      else
+        sudo apt-get remove --quiet -y golang
+      fi
     fi
-
-    echo "Successfully installed Go"
-    return
   fi
+
+  ## FIXME: Configure the version, platform and architecture with env vars
+  ## FIXME: Configure the architecture so that eg. armv7l uses armv6l instead
+  echo "Installing Go version ${GO_VERSION} ..."
+  exec $SHELL -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
+  # curl -sSL https://go.dev/dl/go1.20.3.linux-armv6l.tar.gz | tar xzf -
+
+  # Add Go to the PATH for the current shell session.
+  export PATH=$PATH:/usr/local/go/bin
+
+  # # Install Go using apt-get.
+  # echo "Installing Go (this requires root privileges) ..."
+  # if test $(id -u) -eq 0; then
+  #   apt-get install --quiet -y golang
+  # else
+  #   sudo apt-get install --quiet -y golang
+  # fi
+
+  # Ensure that the correct versino of Go is installed.
+  echo "Checking Go version ..."
+  local go_version="$(go version | awk '{print $3}')"
+  if test "${go_version}" != "go${GO_VERSION}"; then
+    echo "ERROR: Go version ${go_version} is not the expected version ${GO_VERSION}" >&2
+    exit 1
+  fi
+
+  echo "Successfully installed Go"
+  return
 }
 
 # Function for reloading the systemd daemon and its services.
