@@ -2,7 +2,18 @@
 
 This repository maintains the files necessary to install, update and configure [GoBackup](https://github.com/gobackup/gobackup) for Klipper (Moonraker).
 
-***NOTE:*** *Work in progress!*
+***NOTE:*** *This is still a work in progress! Right now it should be functional, but changes are to be expected before this can be deemed stable for public consumption!*
+
+## Features
+
+- [x] Install script for easy installation of the `gobackup` binary, sample configuration file and systemd service
+- [x] Automatic updates via Moonraker's update manager
+- [ ] Install script cleanup, including more safeguards, error handling and better (more user friendly) logging
+- [ ] Uninstall script cleanup, including more safeguards, error handling and better (more user friendly) logging
+- [ ] Universal packages for all popular Klipper platforms and architectures (GoBackup only has binaries for x86 and arm64, however currently we build from source for all other architectures)
+- [ ] Optional support for building from source for the current platform and architecture
+- [ ] Configuration wizard for easy first time configuration of GoBackup
+- [ ] Automatic setup for GoBackup's web interface if an existing nginx proxy is detected (eg. a new endpoint at `/gobackup`)
 
 ## Installation
 
