@@ -65,11 +65,10 @@ function install_go() {
   ## FIXME: Configure the architecture so that eg. armv7l uses armv6l instead
   echo "Installing Go version ${GO_VERSION} ..."
   local current_dir="$(pwd)"
-  cd /usr/local
   if test $(id -u) -eq 0; then
-    curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -
+    bash -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
   else
-    sudo curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -
+    sudo bash -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
   fi
   cd "${current_dir}"
   # curl -sSL https://go.dev/dl/go1.20.3.linux-armv6l.tar.gz | tar xzf -
