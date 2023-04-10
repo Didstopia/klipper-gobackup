@@ -235,7 +235,8 @@ EOT
   else
     # Symlink the configuration file.
     echo "Symlinking GoBackup configuration file ..."
-    ln -s "${config_path}" "${GOBACKUP_CONFIG_PATH}/${config_file}"
+    mkdir -p "${GOBACKUP_CONFIG_PATH}"
+    ln -s "${config_path}" "${GOBACKUP_CONFIG_PATH}/${config_file_name}.yml"
   fi
 
   echo "Successfully configured GoBackup"
@@ -324,3 +325,6 @@ install_gobackup_service
 
 # Start the GoBackup systemd service.
 start_systemd_service "${GOBACKUP_SERVICE_NAME}"
+
+echo "GoBackup installation complete"
+exit 0
