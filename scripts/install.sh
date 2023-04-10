@@ -12,7 +12,7 @@
 set -eo pipefail
 
 # Enable script debugging.
-set -x
+# set -x
 
 # Get the script path.
 SCRIPT_PATH="$(cd "$(dirname "$0")" >/dev/null 2>&1; pwd -P)"
@@ -41,7 +41,6 @@ function cleanup() {
 }
 
 # Load the utility functions.
-# source "$(dirname "${BASH_SOURCE[0]}")/util.sh"
 source "${SCRIPT_PATH}/util.sh"
 
 # Define the expected printer data path,
