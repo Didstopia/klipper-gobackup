@@ -303,6 +303,9 @@ EOT
   else
     sudo cp -f "${source_path}" "${target_path}"
   fi
+  
+  # Remove the temporary systemd service file.
+  rm -f "${source_path}" || true
 
   # Reload systemd and its services.
   reload_systemd
