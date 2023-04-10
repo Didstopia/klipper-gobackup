@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 GO_VERSION="1.20.3"
+GO_VERSION_MIN="1.21"
 
 ## TODO: Since we want to create user specific configuration files and folders, we would never want to run this as root, right?
 # Ensure that this script is never ran as root.
@@ -36,7 +37,7 @@ function check_go_version() {
   # echo "Checking Go version ..."
 
   # Check that Go version is at least 1.13.
-  local min_go_version="1.13"
+  local min_go_version="${GO_VERSION_MIN}"
   local go_version="$(go version | awk '{print $3}')"
   if [ $(version ${go_version}) -ge $(version ${min_go_version}) ]; then
     # echo "Go version ${go_version} is newer than or equal to ${min_go_version}"
