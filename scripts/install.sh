@@ -92,8 +92,8 @@ function install_gobackup() {
 
     # Install Go dependencies.
     echo "Installing GoBackup build dependencies ..."
-    # go get -v -t -d ./...
-    go get -t -d ./...
+    # go get -v -d ./...
+    go mod download
 
     # Build the GoBackup binary for the current platform and architecture.
     echo "Building GoBackup binary for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE} ..."
