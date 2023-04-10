@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 GO_VERSION="1.20.3"
-# GO_VERSION_MIN="1.13"
-GO_VERSION_MIN="1.21"
+GO_VERSION_MIN="1.13"
+# GO_VERSION_MIN="1.21"
 
 ## TODO: Since we want to create user specific configuration files and folders, we would never want to run this as root, right?
 # Ensure that this script is never ran as root.
