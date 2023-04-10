@@ -22,6 +22,36 @@ if test -z "${HOME}"; then
   exit 1
 fi
 
+# Function for installing or updating Go using package kit.
+function install_go() {
+  # Check if Go is already installed.
+  local go="$(which go)"
+  if test -e "${go}"; then
+    echo "Go already installed, checking for updates ..."
+    # Check if Go should be updated
+    local go_version="$("${go}" version | awk '{print $3}')"
+    if test "${go_version}" = "${GO_VERSION}"; then
+      echo "Go already up-to-date"
+      return
+    else
+      echo "Updating Go from ${go_version} to ${GO_VERSION} ..."
+    fi
+  else
+    echo "Go is not installed, installing ..."
+  fi
+
+  # Install Go using package kit.
+  echo "Installing Go (this requires root privileges) ..."
+  if test $(id -u) -eq 0; then
+    apt-get install -y golang
+  else
+    sudo apt-get install -y golang
+  fi
+
+  echo "Successfully installed Go v${GO_VERSION}"
+  return
+}
+
 # Function for reloading the systemd daemon and its services.
 function reload_systemd() {
   echo "Reloading systemd daemon ..."

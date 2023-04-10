@@ -44,6 +44,14 @@ function cleanup() {
 # source "$(dirname "${BASH_SOURCE[0]}")/util.sh"
 source "${SCRIPT_PATH}/util.sh"
 
+# Define the expected printer data path,
+# and verify that it exists.
+PRINTER_DATA_PATH="${HOME}/printer_data"
+if test ! -d "${PRINTER_DATA_PATH}"; then
+  echo "ERROR: Printer data path does not exist: ${PRINTER_DATA_PATH}" >&2
+  exit 1
+fi
+
 # Function for installing or updating the GoBackup binary itself.
 function install_gobackup() {
   # Check if GoBackup is already installed.
@@ -67,6 +75,15 @@ function install_gobackup() {
   # Switch to the temporary directory.
   cd "${GOBACKUP_TEMP_PATH}"
   
+  # Check if the platform and architecture are supported
+  # by querying the GoBackup repository for the release file,
+  # and checking if the HTTP status code is 200.
+  local gobackup_release_url_status_code="$(curl -sSL -o /dev/null -w "%{http_code}" "${GOBACKUP_RELEASE_URL}")"
+  if test "${gobackup_release_url_status_code}" != "200"; then
+    echo "ERROR: GoBackup release file not found for platform ${GOBACKUP_PLATFORM} and architecture ${GOBACKUP_ARCHITECTURE}" >&2
+    exit 1
+  fi
+
   # Download and extract GoBackup to the temporary directory
   curl -sSL "${GOBACKUP_RELEASE_URL}" | tar xzf -
   
@@ -87,10 +104,10 @@ function install_gobackup() {
 }
 
 # Ensures that the GoBackup configuration file exists
-# at $HOME/printer_data/config/gobackup.cfg,
+# at $PRINTER_DATA_PATH/config/gobackup.cfg,
 # and is symlinked to $HOME/.gobackup/gobackup.yml.
 function configure_gobackup() {
-  local config_path="${HOME}/printer_data/config/gobackup.cfg"
+  local config_path="${PRINTER_DATA_PATH}/config/gobackup.cfg"
   local config_dir="$(dirname "${config_path}")"
   local config_file="$(basename "${config_path}")"
   local config_file_name="${config_file%.*}"
@@ -129,11 +146,11 @@ models:
 
       # Paths to include in the backup.
       includes:
-        - ${HOME}/printer_data
+        - ${PRINTER_DATA_PATH}
 
       # Paths to exclude from the backup.
       excludes:
-        - ${HOME}/printer_data/comms
+        - ${PRINTER_DATA_PATH}/comms
 
     # Storages defines the location(s) where the backup should be stored.
     storages:
