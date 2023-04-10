@@ -49,7 +49,7 @@ function install_go() {
     # Check that Go version is at least 1.13.
     echo "Checking Go version ..."
     local go_version="$(go version | awk '{print $3}')"
-    if test "$(printf '%s' "${go_version}" | sort -V | head -n1)" = "${GO_VERSION}"; then
+    if test "$(echo ${go_version} | sort -V | head -n1)" = "${GO_VERSION}"; then
       echo "Go version ${go_version} is new enough, skipping installation ..."
       return
     else
