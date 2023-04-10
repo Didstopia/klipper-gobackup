@@ -68,7 +68,9 @@ function install_go() {
     # fi
 
     # Check that Go version is at least 1.13.
-    if check_go_version; then
+    # Get the result of the check_go_version function without terminating the script.
+    local go_needs_update="$(check_go_version; echo $?)"
+    if go_needs_update; then
       echo "Go version ${go_version} is new enough, skipping installation ..."
       return
     else
