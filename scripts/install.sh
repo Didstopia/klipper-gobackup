@@ -85,6 +85,9 @@ function install_gobackup() {
     # Ensure that Go is installed and up-to-date.
     install_go
 
+    # Get the Go binary path.
+    local go_binary_path="$(which go)"
+
     # Download the GoBackup source code.
     echo "Downloading GoBackup source code ..."
     local gobackup_source_path="${HOME}/gobackup"
@@ -114,14 +117,14 @@ function install_gobackup() {
     # Install Go dependencies.
     echo "Installing GoBackup build dependencies ..."
     # go get -v -d ./...
-    go mod download
+    ${go_binary_path} mod download
 
     # Build the GoBackup binary for the current platform and architecture.
     echo "Building GoBackup binary for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE} ..."
     if test $(id -u) -eq 0; then
-      go build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
+      ${go_binary_path} build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
     else
-      sudo go build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
+      sudo ${go_binary_path} build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
     fi
   else
     # Download and extract GoBackup to the temporary directory
