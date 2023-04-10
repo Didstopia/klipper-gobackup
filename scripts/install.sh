@@ -276,7 +276,7 @@ RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
-EOT;
+EOT
 
   # Check if this is a fresh install
   if test -e "${target_path}"; then
