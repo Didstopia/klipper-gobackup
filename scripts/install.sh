@@ -118,7 +118,11 @@ function install_gobackup() {
 
     # Build the GoBackup binary for the current platform and architecture.
     echo "Building GoBackup binary for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE} ..."
-    go build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
+    if test $(id -u) -eq 0; then
+      go build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
+    else
+      sudo go build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
+    fi
   else
     # Download and extract GoBackup to the temporary directory
     echo "Downloading GoBackup v${GOBACKUP_VERSION} ..."
