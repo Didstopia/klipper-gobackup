@@ -12,7 +12,7 @@
 set -eo pipefail
 
 # Enable script debugging.
-set -x
+# set -x
 
 # Get the script path.
 SCRIPT_PATH="$(cd "$(dirname "$0")" >/dev/null 2>&1; pwd -P)"
@@ -80,12 +80,29 @@ function install_gobackup() {
   # and checking if the HTTP status code is 200.
   local gobackup_release_url_status_code="$(curl -sSL -o /dev/null -w "%{http_code}" "${GOBACKUP_RELEASE_URL}")"
   if test "${gobackup_release_url_status_code}" != "200"; then
-    echo "ERROR: GoBackup release file not found for platform ${GOBACKUP_PLATFORM} and architecture ${GOBACKUP_ARCHITECTURE}" >&2
-    exit 1
-  fi
+    echo "NOTICE: No pre-package binaries found for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE}, attempting to build from sources ..." >&2
+    
+    # Ensure that Go is installed and up-to-date.
+    install_go
 
-  # Download and extract GoBackup to the temporary directory
-  curl -sSL "${GOBACKUP_RELEASE_URL}" | tar xzf -
+    # Download the GoBackup source code.
+    echo "Downloading GoBackup source code ..."
+    git clone --depth 1 --branch "v${GOBACKUP_VERSION}" "${GOBACKUP_REPOSITORY}" "${GOBACKUP_TEMP_PATH}"
+    ## TODO: Do we need to clear the temp dir first, before cloning?
+
+    # Install Go dependencies.
+    echo "Installing GoBackup build dependencies ..."
+    # go get -v -t -d ./...
+    go get -t -d ./...
+
+    # Build the GoBackup binary for the current platform and architecture.
+    echo "Building GoBackup binary for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE} ..."
+    go build -o "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}"
+  else
+    # Download and extract GoBackup to the temporary directory
+    echo "Downloading GoBackup v${GOBACKUP_VERSION} ..."
+    curl -sSL "${GOBACKUP_RELEASE_URL}" | tar xzf -
+  fi
   
   # Copy the GoBackup binary to the installation path.
   # (requires root privileges, so we need to use sudo if not running as root)
