@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 GO_VERSION="1.20.3"
-GO_VERSION_MIN="1.21"
+GO_VERSION_MIN="1.13"
 
 ## TODO: Since we want to create user specific configuration files and folders, we would never want to run this as root, right?
 # Ensure that this script is never ran as root.
@@ -75,7 +75,7 @@ function install_go() {
     local go_version="$(go version | awk '{print $3}')"
     local go_needs_update="$(check_go_version; echo $?)"
     if [ $go_needs_update = 1 ]; then
-      echo "Go version ${go_version} is not new enough, removing old version ..."
+      echo "Go version ${go_version} is not new enough (needs to be ${min_go_version} or newer), removing old version ..."
       if test $(id -u) -eq 0; then
         apt-get remove --quiet -y golang
       else
