@@ -32,9 +32,25 @@ function reload_systemd() {
   fi
 }
 
+# Function that checks if a systemd service file exists,
+# based on the service name as the first argument.
+function systemd_service_exists() {
+  ## TODO: We might want to use systemctl instead of checking the file system directly, in case paths change in the future?
+  if test -e "/etc/systemd/system/${1}.service"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 # Function for enabling a systemd service,
 # based on the service name as the first argument.
 function enable_systemd_service() {
+  # Return early if the service does not exist.
+  if ! systemd_service_exists "${1}"; then
+    return 1
+  fi
+
   echo "Enabling systemd service ${1} ..."
   if test $(id -u) -eq 0; then
     systemctl enable "${1}"
@@ -46,6 +62,11 @@ function enable_systemd_service() {
 # Function for disabling a systemd service,
 # based on the service name as the first argument.
 function disable_systemd_service() {
+  # Return early if the service does not exist.
+  if ! systemd_service_exists "${1}"; then
+    return 1
+  fi
+
   echo "Disabling systemd service ${1} ..."
   if test $(id -u) -eq 0; then
     systemctl disable "${1}"
@@ -57,6 +78,11 @@ function disable_systemd_service() {
 # Function for starting a systemd service,
 # based on the service name as the first argument.
 function start_systemd_service() {
+  # Return early if the service does not exist.
+  if ! systemd_service_exists "${1}"; then
+    return 1
+  fi
+
   echo "Starting systemd service ${1} ..."
   if test $(id -u) -eq 0; then
     systemctl start "${1}"
@@ -68,6 +94,11 @@ function start_systemd_service() {
 # Function for stopping a systemd service,
 # based on the service name as the first argument.
 function stop_systemd_service() {
+  # Return early if the service does not exist.
+  if ! systemd_service_exists "${1}"; then
+    return 1
+  fi
+
   echo "Stopping systemd service ${1} ..."
   if test $(id -u) -eq 0; then
     systemctl stop "${1}"
@@ -79,6 +110,11 @@ function stop_systemd_service() {
 # Function for restarting a systemd service,
 # based on the service name as the first argument.
 function restart_systemd_service() {
+  # Return early if the service does not exist.
+  if ! systemd_service_exists "${1}"; then
+    return 1
+  fi
+
   echo "Restarting systemd service ${1} ..."
   if test $(id -u) -eq 0; then
     systemctl restart "${1}"

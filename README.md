@@ -6,9 +6,17 @@ This repository maintains the files necessary to install, update and configure [
 
 ## Installation
 
-***TODO:*** *Add initial install steps etc.*
+Install GoBackup by checking out the repository and running the install script:
 
-Setup automatic updates by adding the following `update_manager` entry to your `moonraker.conf` (or to the file where you configure Moonraker's update manager):
+```bash
+# Clone the repository
+git clone https://github.com/Didstopia/klipper-gobackup.git ~/moonraker-gobackup
+
+# Run the install script
+~/moonraker-gobackup/scripts/install.sh
+```
+
+Optionally you can also setup automatic updates by adding the following `update_manager` entry to your `moonraker.conf` (or to the file where you configure Moonraker's update manager):
 
 ```yaml
 # Update manager entry for GoBackup
@@ -21,6 +29,8 @@ primary_branch: master
 install_script: scripts/install.sh
 managed_services: gobackup
 ```
+
+Now you can restart Moonraker and GoBackup should be installed and configured, and kept up-to-date automatically.
 
 ## Configuration
 
