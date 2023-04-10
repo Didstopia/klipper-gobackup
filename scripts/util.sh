@@ -33,7 +33,7 @@ function version() {
 }
 
 function check_go_version() {
-  echo "Checking Go version ..."
+  # echo "Checking Go version ..."
 
   # Check that Go version is at least 1.13.
   local min_go_version="1.13"
