@@ -48,7 +48,8 @@ function systemd_service_exists() {
 function enable_systemd_service() {
   # Return early if the service does not exist.
   if ! systemd_service_exists "${1}"; then
-    return 1
+    # return 1
+    return
   fi
 
   echo "Enabling systemd service ${1} ..."
@@ -64,7 +65,8 @@ function enable_systemd_service() {
 function disable_systemd_service() {
   # Return early if the service does not exist.
   if ! systemd_service_exists "${1}"; then
-    return 1
+    # return 1
+    return
   fi
 
   echo "Disabling systemd service ${1} ..."
@@ -80,7 +82,8 @@ function disable_systemd_service() {
 function start_systemd_service() {
   # Return early if the service does not exist.
   if ! systemd_service_exists "${1}"; then
-    return 1
+    # return 1
+    return
   fi
 
   echo "Starting systemd service ${1} ..."
@@ -96,7 +99,8 @@ function start_systemd_service() {
 function stop_systemd_service() {
   # Return early if the service does not exist.
   if ! systemd_service_exists "${1}"; then
-    return 1
+    # return 1
+    return
   fi
 
   echo "Stopping systemd service ${1} ..."
@@ -112,7 +116,8 @@ function stop_systemd_service() {
 function restart_systemd_service() {
   # Return early if the service does not exist.
   if ! systemd_service_exists "${1}"; then
-    return 1
+    # return 1
+    return
   fi
 
   echo "Restarting systemd service ${1} ..."
