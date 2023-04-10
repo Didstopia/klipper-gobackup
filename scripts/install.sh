@@ -8,13 +8,16 @@
 # - https://github.com/eliteSchwein/mooncord/blob/master/scripts/install.sh
 #
 
-# Enable error handling
+# Enable error handling.
 set -eo pipefail
 
-# Enable script debugging
+# Enable script debugging.
 set -x
 
-# Define global variables
+# Get the script path.
+SCRIPT_PATH="$(cd "$(dirname "$0")" >/dev/null 2>&1; pwd -P)"
+
+# Define global variables.
 GOBACKUP_REPOSITORY="gobackup/gobackup"
 GOBACKUP_VERSION="2.0.1"
 GOBACKUP_BINARY="gobackup"
@@ -24,20 +27,26 @@ GOBACKUP_RELEASE_FILENAME="gobackup-${platform}-${arch}.tar.gz"
 GOBACKUP_RELEASE_URL="https://github.com/${GOBACKUP_REPOSITORY}/releases/download/${GOBACKUP_VERSION}/${GOBACKUP_RELEASE_FILENAME}"
 GOBACKUP_INSTALL_PATH="/usr/local/bin"
 GOBACKUP_BINARY_PATH="${GOBACKUP_INSTALL_PATH}/${GOBACKUP_BINARY}"
+GOBACKUP_CONFIG_PATH="${HOME}/.gobackup"
+GOBACKUP_SERVICE_NAME="gobackup"
 GOBACKUP_TEMP_PATH="$(mktemp -d)"
 
-# Setup a signal trap to always clean up when terminating
+# Setup a signal trap to always clean up when terminating.
 trap "cleanup" EXIT
 
 # Function for cleaning up when terminating the script.
 function cleanup() {
-  # Remove the temporary directory
+  # Remove the temporary directory.
   rm -r ${GOBACKUP_TEMP_PATH}
 }
 
+# Load the utility functions.
+# source "$(dirname "${BASH_SOURCE[0]}")/util.sh"
+source "${SCRIPT_PATH}/util.sh"
+
 # Function for installing or updating the GoBackup binary itself.
 function install_gobackup() {
-  # Check if GoBackup is already installed
+  # Check if GoBackup is already installed.
   if test -e "${GOBACKUP_BINARY_PATH}"; then
     
     echo "GoBackup already installed, checking for updates ..."  
@@ -55,17 +64,192 @@ function install_gobackup() {
     echo "GoBackup is not installed, installing ..."
   fi
   
-  # Switch to the temporary directory
+  # Switch to the temporary directory.
   cd "${GOBACKUP_TEMP_PATH}"
   
   # Download and extract GoBackup to the temporary directory
   curl -sSL "${GOBACKUP_RELEASE_URL}" | tar xzf -
   
+  # Copy the GoBackup binary to the installation path.
+  # (requires root privileges, so we need to use sudo if not running as root)
+  echo "Installing GoBackup binary (this requires root privileges) ..."
+  if test $(id -u) -eq 0; then
+    cp -f "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}" "${GOBACKUP_BINARY_PATH}"
+  else
+    sudo cp -f "${GOBACKUP_TEMP_PATH}/${GOBACKUP_BINARY}" "${GOBACKUP_BINARY_PATH}"
+  fi
+
+  # Ensure that the user specific GoBackup configuration directory exists.
+  mkdir -p "${GOBACKUP_CONFIG_PATH}"
+
   echo "Successfully installed GoBackup v${GOBACKUP_VERSION}"
   return
 }
 
+# Ensures that the GoBackup configuration file exists
+# at $HOME/printer_data/config/gobackup.cfg,
+# and is symlinked to $HOME/.gobackup/gobackup.yml.
+function configure_gobackup() {
+  local config_path="${HOME}/printer_data/config/gobackup.cfg"
+  local config_dir="$(dirname "${config_path}")"
+  local config_file="$(basename "${config_path}")"
+  local config_file_name="${config_file%.*}"
+  local config_file_extension="${config_file##*.}"
+
+  # Ensure that the configuration directory exists.
+  mkdir -p "${config_dir}"
+
+  # Check if the configuration file already exists.
+  if test -e "${config_path}"; then
+    echo "GoBackup configuration file already exists, skipping ..."
+  else
+    # Create a new configuration file.
+    echo "Creating GoBackup configuration file ..."
+    cat <<EOT >> "${config_path}"
+#
+# GoBackup configuration file.
+#
+# See the following URL for a configuration and usage reference:
+# https://github.com/gobackup/gobackup
+#
+
+# Models defines the backup definition(s).
+models:
+
+  # An example backup definition,
+  # that backs up the ~/printer_data folder.
+  printer_data:
+
+    # Run on a schedule.
+    schedule:
+      cron: "5 4 * * sun"     # Run at 04:05 every Sunday.
+
+    # Archive backs up the defined path(s).
+    archive:
+
+      # Paths to include in the backup.
+      includes:
+        - ${HOME}/printer_data
+
+      # Paths to exclude from the backup.
+      excludes:
+        - ${HOME}/printer_data/comms
+
+    # Storages defines the location(s) where the backup should be stored.
+    storages:
+
+      # Local storage.
+      local:
+        type: local           # The storage type.
+        path: ${HOME}/backups # The path where the backup should be stored.
+
+      # S3 compatible storage.
+      # s3:
+      #   type: s3
+      #   bucket: my_app_backup
+      #   region: us-east-1
+      #   path: backups
+      #   access_key_id: \$S3_ACCESS_KEY_Id
+      #   secret_access_key: \$S3_SECRET_ACCESS_KEY
+
+    # Compression options.
+    compress_with:
+      type: tgz               # Compression type.
+EOT
+  fi
+
+  # Check if the configuration file is already symlinked.
+  if test -L "${GOBACKUP_CONFIG_PATH}/${config_file}"; then
+    echo "GoBackup configuration file is already symlinked, skipping ..."
+  else
+    # Symlink the configuration file.
+    echo "Symlinking GoBackup configuration file ..."
+    ln -s "${config_path}" "${GOBACKUP_CONFIG_PATH}/${config_file}"
+  fi
+
+  echo "Successfully configured GoBackup"
+}
+
 # Function for installing or updating the custom systemd service for GoBackup.
 function install_gobackup_service() {
-  
+  local source_path = "${GOBACKUP_TEMP_PATH}/${GOBACKUP_SERVICE_NAME}"
+  local target_path = "/etc/systemd/system/${GOBACKUP_SERVICE_NAME}.service"
+
+  local user = "$(id -un)"
+  if test -z "${user}"; then
+    echo "ERROR: Could not determine current user name" >&2
+    exit 1
+  fi
+
+  local group = "$(id -gn)"
+  if test -z "${group}"; then
+    echo "ERROR: Could not determine current group name" >&2
+    exit 1
+  fi
+
+  # Echo a systemd service file to the temporary directory.
+  cat <<EOT >> "${source_path}"
+# GOBACKUP_VERSION=${GOBACKUP_VERSION}
+[Unit]
+Description=GoBackup
+After=moonraker.service
+
+[Service]
+Type=simple
+User=${user}
+Group=${group}
+WorkingDirectory=${HOME}
+ExecStart=${GOBACKUP_BINARY_PATH} start
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOT
+
+  # Check if this is a fresh install
+  if test -e "${target_path}"; then
+    echo "GoBackup systemd service already installed, checking for updates ..."
+
+    # Check the GOBACKUP_VERSION of the service file to determine if we need to update it
+    local service_version = "$(grep "^# GOBACKUP_VERSION=" "${target_path}" | awk -F= '{print $NF}')"
+    if test "${service_version}" = "${GOBACKUP_VERSION}"; then
+      echo "GoBackup systemd service already up-to-date"
+      return
+    else
+      echo "Updating GoBackup systemd service from version ${service_version} to ${GOBACKUP_VERSION} ..."
+    fi
+
+  else
+    echo "GoBackup systemd service is not installed, installing ..."
+  fi
+
+  # Copy the systemd service file to the installation path.
+  # (requires root privileges, so we need to use sudo if not running as root)
+  if test $(id -u) -eq 0; then
+    cp -f "${source_path}" "${target_path}"
+  else
+    sudo cp -f "${source_path}" "${target_path}"
+  fi
+
+  # Reload systemd and its services.
+  reload_systemd
+
+  # Ensure that the GoBackup systemd service is always enabled.
+  enable_systemd_service "${GOBACKUP_SERVICE_NAME}"
 }
+
+# Stop the GoBackup systemd service.
+stop_systemd_service "${GOBACKUP_SERVICE_NAME}"
+
+# Ensure that the GoBackup binary is installed and up-to-date.
+install_gobackup
+
+# Ensure that the GoBackup configuration is setup.
+configure_gobackup
+
+# Ensure that the custom systemd service is installed and up-to-date.
+install_gobackup_service
+
+# Start the GoBackup systemd service.
+start_systemd_service "${GOBACKUP_SERVICE_NAME}"
