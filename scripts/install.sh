@@ -259,7 +259,8 @@ function install_gobackup_service() {
   fi
 
   # Echo a systemd service file to the temporary directory.
-  cat <<EOT >> "${source_path}"
+  if test $(id -u) -eq 0; then
+      cat <<EOT >> "${source_path}"
 # GOBACKUP_VERSION=${GOBACKUP_VERSION}
 [Unit]
 Description=GoBackup
@@ -277,6 +278,26 @@ RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOT
+  else
+    sudo   cat <<EOT >> "${source_path}"
+# GOBACKUP_VERSION=${GOBACKUP_VERSION}
+[Unit]
+Description=GoBackup
+After=moonraker.service
+
+[Service]
+Type=simple
+User=${user}
+Group=${group}
+WorkingDirectory=${HOME}
+ExecStart=${GOBACKUP_BINARY_PATH} start
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOT
+  fi
 
   # Check if this is a fresh install
   if test -e "${target_path}"; then
