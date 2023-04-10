@@ -72,7 +72,7 @@ function install_go() {
     # Check that Go version is at least 1.13.
     # Get the result of the check_go_version function without terminating the script.
     local go_needs_update="$(check_go_version; echo $?)"
-    if go_needs_update; then
+    if $go_needs_update; then
       echo "Go version ${go_version} is not new enough, removing old version ..."
       if test $(id -u) -eq 0; then
         apt-get remove --quiet -y golang
