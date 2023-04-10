@@ -14,6 +14,7 @@ This repository maintains the files necessary to install, update and configure [
 - [ ] Optional support for building from source for the current platform and architecture
 - [ ] Configuration wizard for easy first time configuration of GoBackup
 - [ ] Automatic setup for GoBackup's web interface if an existing nginx proxy is detected (eg. a new endpoint at `/gobackup`)
+- [ ] Automatic setup of Moonraker integration (update manager entry, `moonraker.asvc` entry, starting/stopping/restarting Moonraker etc.)
 
 ## Installation
 
@@ -42,6 +43,8 @@ primary_branch: master
 install_script: scripts/install.sh
 managed_services: gobackup
 ```
+
+Ensure that you also add `gobackup` to the bottom of your `~/printer_data/moonraker.asvc` file, so that Moonraker can control the GoBackup service.
 
 If you setup the automatic updates above, you may additionally need to restart Moonraker.
 
