@@ -39,8 +39,10 @@ function check_go_version() {
   local min_go_version="1.13"
   local go_version="$(go version | awk '{print $3}')"
   if [ $(version ${go_version}) -ge $(version ${min_go_version}) ]; then
+    echo "Go version ${go_version} is newer than or equal to ${min_go_version}"
     return 0
   else
+    echo "Go version ${go_version} is older than ${min_go_version}"
     return 1
   fi
 }
@@ -71,15 +73,15 @@ function install_go() {
     # Get the result of the check_go_version function without terminating the script.
     local go_needs_update="$(check_go_version; echo $?)"
     if go_needs_update; then
-      echo "Go version ${go_version} is new enough, skipping installation ..."
-      return
-    else
       echo "Go version ${go_version} is not new enough, removing old version ..."
       if test $(id -u) -eq 0; then
         apt-get remove --quiet -y golang
       else
         sudo apt-get remove --quiet -y golang
       fi
+    else
+      echo "Go is already installed and up-to-date"
+      return
     fi
   else
     echo "Go is not installed, installing ..."
