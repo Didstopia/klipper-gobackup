@@ -39,10 +39,10 @@ function check_go_version() {
   local min_go_version="1.13"
   local go_version="$(go version | awk '{print $3}')"
   if [ $(version ${go_version}) -ge $(version ${min_go_version}) ]; then
-    echo "Go version ${go_version} is newer than or equal to ${min_go_version}"
+    # echo "Go version ${go_version} is newer than or equal to ${min_go_version}"
     return 0
   else
-    echo "Go version ${go_version} is older than ${min_go_version}"
+    # echo "Go version ${go_version} is older than ${min_go_version}"
     return 1
   fi
 }
