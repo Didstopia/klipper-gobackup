@@ -112,12 +112,19 @@ function install_gobackup() {
 
     # Build web assets
     echo "Building web assets ..."
-    make build_web
+    if test $(id -u) -eq 0; then
+      make build_web
+    else
+      sudo make build_web
+    fi
 
     # Install Go dependencies.
     echo "Installing GoBackup build dependencies ..."
-    # go get -v -d ./...
-    ${go_binary_path} mod download
+    if test $(id -u) -eq 0; then
+      ${go_binary_path} mod download
+    else
+      sudo ${go_binary_path} mod download
+    fi
 
     # Build the GoBackup binary for the current platform and architecture.
     echo "Building GoBackup binary for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE} ..."
