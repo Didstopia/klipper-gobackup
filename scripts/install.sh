@@ -76,9 +76,9 @@ function install_gobackup() {
   
   # Check if the platform and architecture are supported
   # by querying the GoBackup repository for the release file,
-  # and checking if the HTTP status code is 200.
+  # and checking if the HTTP status code is not 404.
   local gobackup_release_url_status_code="$(curl -sSL -o /dev/null -w "%{http_code}" "${GOBACKUP_RELEASE_URL}")"
-  if test "${gobackup_release_url_status_code}" != "200"; then
+  if test "${gobackup_release_url_status_code}" == "404"; then
     echo "NOTICE: No pre-package binaries found for ${GOBACKUP_PLATFORM}/${GOBACKUP_ARCHITECTURE}, attempting to build from sources ..." >&2
     
     # Ensure that Go is installed and up-to-date.
