@@ -62,8 +62,19 @@ function install_go() {
   ## FIXME: Configure the version, platform and architecture with env vars
   ## FIXME: Configure the architecture so that eg. armv7l uses armv6l instead
   echo "Installing Go version ${GO_VERSION} ..."
-  exec $SHELL -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
+  if test $(id -u) -eq 0; then
+    exec $SHELL -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
+  else
+    sudo exec $SHELL -c "cd /usr/local && curl -sSL https://go.dev/dl/go${GO_VERSION}.linux-armv6l.tar.gz | tar xzf -"
+  fi
   # curl -sSL https://go.dev/dl/go1.20.3.linux-armv6l.tar.gz | tar xzf -
+
+  # Add Go to PATH for the current user's profile,
+  # if it is not already there.
+  echo "Adding Go to PATH ..."
+  if ! grep -q "export PATH=\$PATH:/usr/local/go/bin" "${HOME}/.profile"; then
+    echo "export PATH=\$PATH:/usr/local/go/bin" >> "${HOME}/.profile"
+  fi
 
   # Add Go to the PATH for the current shell session.
   export PATH=$PATH:/usr/local/go/bin
