@@ -24,6 +24,27 @@ if test -z "${HOME}"; then
   exit 1
 fi
 
+function is_version_lte() {
+  [  "${1}" = "`echo -e "${1}\n${2}" | sort -V | head -n1`" ]
+}
+
+function version() {
+  echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }';
+}
+
+function check_go_version() {
+  echo "Checking Go version ..."
+
+  # Check that Go version is at least 1.13.
+  local min_go_version="1.13"
+  local go_version="$(go version | awk '{print $3}')"
+  if [ $(version ${go_version}) -ge $(version ${min_go_version}) ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 # Function for installing or updating Go.
 function install_go() {
   ## TODO: Use PackageKit instead of apt-get directly!?
@@ -47,9 +68,7 @@ function install_go() {
     # fi
 
     # Check that Go version is at least 1.13.
-    echo "Checking Go version ..."
-    local go_version="$(go version | awk '{print $3}')"
-    if test "$(echo ${go_version} | sort -V | head -n1)" = "${GO_VERSION}"; then
+    if check_go_version; then
       echo "Go version ${go_version} is new enough, skipping installation ..."
       return
     else
