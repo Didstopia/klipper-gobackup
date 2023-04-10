@@ -271,7 +271,7 @@ Type=simple
 User=${user}
 Group=${group}
 WorkingDirectory=${HOME}
-ExecStart=${GOBACKUP_BINARY_PATH} start
+ExecStart=${GOBACKUP_BINARY_PATH} run
 Restart=on-failure
 RestartSec=5
 
