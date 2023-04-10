@@ -96,6 +96,18 @@ function install_gobackup() {
       git reset --hard "v${GOBACKUP_VERSION}"
     fi
 
+    # Install Yarn
+    echo "Ensuring yarn is installed ..."
+    if test $(id -u) -eq 0; then
+      apt-get install -y --no-install-recommends yarnpkg
+    else
+      sudo apt-get install -y --no-install-recommends yarnpkg
+    fi
+
+    # Build web assets
+    echo "Building web assets ..."
+    make build_web
+
     # Install Go dependencies.
     echo "Installing GoBackup build dependencies ..."
     # go get -v -d ./...

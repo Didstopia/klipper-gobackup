@@ -79,9 +79,10 @@ function install_go() {
   if ! grep -q "export PATH=\$PATH:/usr/local/go/bin" "${HOME}/.profile"; then
     echo "export PATH=\$PATH:/usr/local/go/bin" >> "${HOME}/.profile"
   fi
+  source ~/.profile
 
   # Add Go to the PATH for the current shell session.
-  export PATH=$PATH:/usr/local/go/bin
+  # export PATH=$PATH:/usr/local/go/bin
 
   # # Install Go using apt-get.
   # echo "Installing Go (this requires root privileges) ..."
