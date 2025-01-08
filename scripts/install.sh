@@ -19,7 +19,7 @@ SCRIPT_PATH="$(cd "$(dirname "$0")" >/dev/null 2>&1; pwd -P)"
 
 # Define global variables.
 GOBACKUP_REPOSITORY="gobackup/gobackup"
-GOBACKUP_VERSION="2.0.1"
+GOBACKUP_VERSION="2.13.1"
 GOBACKUP_BINARY="gobackup"
 GOBACKUP_PLATFORM="$(uname | tr "[A-Z]" "[a-z]")"
 GOBACKUP_ARCHITECTURE="$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/')"
